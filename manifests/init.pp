@@ -95,7 +95,7 @@ class chocolatey_server (
   -> iis_site {'chocolateyserver':
     ensure           => 'started',
     physicalpath     => $_chocolatey_server_location,
-    aapplicationpool => $_chocolatey_server_app_pool_name,
+    applicationpool => $_chocolatey_server_app_pool_name,
     preloadenabled   => true,
     bindings         =>  [
       {
