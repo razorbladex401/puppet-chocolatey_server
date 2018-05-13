@@ -33,12 +33,16 @@ class chocolatey_server (
   $port = $::chocolatey_server::params::service_port,
   $server_package_source = $::chocolatey_server::params::server_package_source,
   $server_install_location = $::chocolatey_server::params::server_install_location,
+  $certificate_hash = $::chocolatey_server::params::cert_hash,
+  $secure_web = $::chocolatey_server::params::secure_web,
 ) inherits ::chocolatey_server::params {
-  require chocolatey
+  require ::chocolatey
 
   $_chocolatey_server_location      = $server_install_location
   $_chocolatey_server_app_pool_name = 'chocolateyserver'
   $_chocolatey_server_app_port      = $port
+  $_chocolatey_certificate          = $certificate_hash
+  $_chocolatey_secure_web           = $secure_web
   $_server_package_url              = $server_package_source
   $_is_windows_2008 = $::kernelmajversion ? {
     '6.1'   => true,
@@ -89,36 +93,67 @@ class chocolatey_server (
     idle_timeout              => '00:00:00',
     restart_time_limit        => '00:00:00',
   }
-  -> iis_site {'chocolateyserver':
-    ensure          => 'started',
-    physicalpath    => $_chocolatey_server_location,
-    applicationpool => $_chocolatey_server_app_pool_name,
-    preloadenabled  => true,
-    bindings        =>  [
-      {
-        'bindinginformation' => '*:80:',
-        'protocol'           => 'http'
-      }
-    ],
-    require         => Package['chocolatey.server'],
+  # create both http and https bindings.  certificate hash required for https binding.
+  if $_chocolatey_secure_web == true {
+    -> iis_site {'chocolateyserver':
+      ensure           => 'started',
+      physicalpath     => $_chocolatey_server_location,
+      aapplicationpool => $_chocolatey_server_app_pool_name,
+      preloadenabled   => true,
+      bindings         =>  [
+        {
+          'bindinginformation' => '*:80:',
+          'protocol'           => 'http'
+        },
+        {
+          'bindinginformation'   => '*:443:',
+          'protocol'             => 'https',
+          'certificatehash'      => $_chocolatey_certificate,
+          'certificatestorename' => 'MY',
+          'sslflags'             => 2,
+        },
+      ],
+      require          => Package['chocolatey.server'],
+    }
   }
+  else{
+    -> iis_site {'chocolateyserver':
+        ensure          => 'started',
+        physicalpath    => $_chocolatey_server_location,
+        applicationpool => $_chocolatey_server_app_pool_name,
+        preloadenabled  => true,
+        bindings        =>  [
+          {
+            'bindinginformation' => '*:80:',
+            'protocol'           => 'http'
+          },
+        ],
+        require         => Package['chocolatey.server'],
+      }
+    }
 
   # lock down web directory
   -> acl { $_chocolatey_server_location:
     purge                      => true,
     inherit_parent_permissions => false,
     permissions                => [
-      { identity => 'Administrators', rights => ['full'] },
-      { identity => 'IIS_IUSRS', rights => ['read'] },
-      { identity => 'IUSR', rights => ['read'] },
-      { identity => "IIS APPPOOL\\${_chocolatey_server_app_pool_name}", rights => ['read'] }
+      { identity => 'Administrators',
+        rights   => ['full'] },
+      { identity => 'IIS_IUSRS',
+        rights   => ['read'] },
+      { identity => 'IUSR',
+        rights   => ['read'] },
+      { identity => "IIS APPPOOL\\${_chocolatey_server_app_pool_name}",
+        rights   => ['read'] }
     ],
     require                    => Package['chocolatey.server'],
   }
   -> acl { "${_chocolatey_server_location}/App_Data":
     permissions => [
-      { identity => "IIS APPPOOL\\${_chocolatey_server_app_pool_name}", rights => ['modify'] },
-      { identity => 'IIS_IUSRS', rights => ['modify'] }
+      { identity => "IIS APPPOOL\\${_chocolatey_server_app_pool_name}",
+        rights   => ['modify'] },
+      { identity => 'IIS_IUSRS',
+        rights   => ['modify'] }
     ],
     require     => Package['chocolatey.server'],
   }
