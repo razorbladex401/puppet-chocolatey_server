@@ -94,7 +94,7 @@ class chocolatey_server (
     restart_time_limit        => '00:00:00',
   }
   # create both http and https bindings.  certificate hash required for https binding.
-  if $_chocolatey_secure_web == true {
+  if $_chocolatey_secure_web == 'true' {
     -> iis_site {'chocolateyserver':
       ensure           => 'started',
       physicalpath     => $_chocolatey_server_location,
