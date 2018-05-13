@@ -34,7 +34,6 @@ class chocolatey_server (
   $server_package_source = $::chocolatey_server::params::server_package_source,
   $server_install_location = $::chocolatey_server::params::server_install_location,
   $certificate_hash = $::chocolatey_server::params::cert_hash,
-  $secure_web = $::chocolatey_server::params::secure_web,
 ) inherits ::chocolatey_server::params {
   require ::chocolatey
 
@@ -42,7 +41,6 @@ class chocolatey_server (
   $_chocolatey_server_app_pool_name = 'chocolateyserver'
   $_chocolatey_server_app_port      = $port
   $_chocolatey_certificate          = $certificate_hash
-  $_chocolatey_secure_web           = $secure_web
   $_server_package_url              = $server_package_source
   $_is_windows_2008 = $::kernelmajversion ? {
     '6.1'   => true,
