@@ -88,7 +88,6 @@ class chocolatey_server (
     dsc_ensure          => 'present',
     dsc_applicationpool => 'DefaultAppPool',
     dsc_state           => 'Stopped',
-    require             => dsc_windowsfeature['Web-Server'],
   }
 
   # create application in iis
