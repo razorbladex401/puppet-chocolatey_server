@@ -42,14 +42,7 @@ class chocolatey_server (
   $_chocolatey_server_app_port      = $port
   $_chocolatey_certificate          = $certificate_hash
   $_server_package_url              = $server_package_source
-  $_is_windows_2008 = $::kernelmajversion ? {
-    '6.1'   => true,
-    default => false
-  }
-  $_install_management_tools = $_is_windows_2008 ? {
-    true    => false,
-    default => true
-  }
+
   $_web_asp_net = $_is_windows_2008 ? {
     true    => 'Web-Asp-Net',
     default => 'Web-Asp-Net45'
@@ -63,54 +56,69 @@ class chocolatey_server (
   }
 
   # add windows features
-  iis_feature { 'Web-WebServer':
-    ensure                   => present,
-    include_management_tools => $_install_management_tools,
+  dsc_windowsfeature {'IIS':
+    dsc_ensure => 'present',
+    dsc_name   => 'Web-Server',
   }
-  -> iis_feature { $_web_asp_net:
-    ensure => present,
+  # add windows management tools
+  -> dsc_windowsfeature {'Mgmt-Console':
+    dsc_ensure => 'present',
+    dsc_name   => 'Web-Mgmt-Console',
   }
-  -> iis_feature { 'Web-AppInit':
-    ensure => present,
+  # install aspnet package
+  -> dsc_windowsfeature {'$_web_asp_net':
+    dsc_ensure => 'present',
+    dsc_name   => '$_web_asp_net',
+  }
+  -> dsc_windowsfeature {'Web-AppInit':
+    dsc_ensure => present,
+  }
+  # install iis scripting tools
+  -> dsc_windowsfeature {'IIS-Scripting-Tools':
+    dsc_ensure => present,
+    dsc_name   => 'Web-Scripting-Tools',
+  }
+  # stop the default website
+  -> dsc_xwebsite {'Default Web Site':
+    dsc_ensure          => 'present',
+    dsc_applicationpool => 'DefaultAppPool',
+    dsc_state           => 'Stopped',
+    require             => dsc_windowsfeature['Web-Server'],
   }
 
-  # remove default web site
-  -> iis_site {'Default Web Site':
-    ensure          => absent,
-    applicationpool => 'DefaultAppPool',
-    require         => Iis_feature['Web-WebServer'],
+  # create application in iis
+  -> dsc_xwebapppool { $_chocolatey_server_app_pool_name:
+    dsc_ensure                => 'present',
+    dsc_state                 => 'Started',
+    dsc_name                  => $_chocolatey_server_app_pool_name,
+    dsc_managedruntimeversion => 'v4.0',
+    dsc_enable32bitapponwin64 => true,
+    dsc_idletimeout           => '0',
+    dsc_restarttimelimit      => '0',
+    dsc_startmode             => 'AlwaysRunning',
   }
 
-  # application in iis
-  -> iis_application_pool { $_chocolatey_server_app_pool_name:
-    ensure                    => 'present',
-    state                     => 'started',
-    enable32_bit_app_on_win64 => true,
-    managed_runtime_version   => 'v4.0',
-    start_mode                => 'AlwaysRunning',
-    idle_timeout              => '00:00:00',
-    restart_time_limit        => '00:00:00',
-  }
   # create both http and https bindings.  certificate hash required for https binding.
-  -> iis_site {'chocolateyserver':
-    ensure           => 'started',
-    physicalpath     => $_chocolatey_server_location,
-    applicationpool => $_chocolatey_server_app_pool_name,
-    preloadenabled   => true,
-    bindings         =>  [
+  -> dsc_xwebsite {'chocolateyserver':
+    dsc_ensure          => 'present',
+    dsc_name            => 'chocolateyserver',
+    dsc_physicalpath    => $_chocolatey_server_location,
+    dsc_applicationpool => $_chocolatey_server_app_pool_name,
+    dsc_preloadenabled  => true,
+    dsc_bindinginfo     =>  [
       {
-        'bindinginformation' => '*:80:',
-        'protocol'           => 'http'
+        'port'     => '80',
+        'protocol' => 'HTTP'
       },
       {
-        'bindinginformation'   => '*:443:',
-        'protocol'             => 'https',
-        'certificatehash'      => $_chocolatey_certificate,
-        'certificatestorename' => 'MY',
-        'sslflags'             => 1,
+        'port'                  => '443',
+        'protocol'              => 'HTTPS',
+        'CertificateThumbprint' => $_chocolatey_certificate,
+        'CertificateStoreName'  => 'MY',
+        'Sslflags'              => 1,
       },
     ],
-    require          => Package['chocolatey.server'],
+    require             => Package['chocolatey.server'],
   }
 
   # lock down web directory
