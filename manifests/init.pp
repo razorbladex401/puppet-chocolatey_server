@@ -86,9 +86,9 @@ class chocolatey_server (
   }
   # stop the default website
   -> dsc_xwebsite {'Default Web Site':
-    dsc_ensure          => 'present',
+    dsc_ensure          => 'absent',
+    dsc_name            => 'Default Web Site',
     dsc_applicationpool => 'DefaultAppPool',
-    dsc_state           => 'Stopped',
   }
 
   # create application in iis
