@@ -77,6 +77,7 @@ class chocolatey_server (
   }
   -> dsc_windowsfeature {'Web-AppInit':
     dsc_ensure => present,
+    dsc_name   => 'Web-AppInit',
   }
   # install iis scripting tools
   -> dsc_windowsfeature {'IIS-Scripting-Tools':
