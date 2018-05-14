@@ -112,15 +112,17 @@ class chocolatey_server (
     dsc_preloadenabled  => true,
     dsc_bindinginfo     =>  [
       {
-        'port'     => '80',
-        'protocol' => 'HTTP'
+        ipaddress => '*',
+        port      => '80',
+        protocol  => 'HTTP',
       },
       {
-        'port'                  => '443',
-        'protocol'              => 'HTTPS',
-        'CertificateThumbprint' => $_chocolatey_certificate,
-        'CertificateStoreName'  => 'MY',
-        'Sslflags'              => 1,
+        ipaddress             => '*',
+        port                  => '443',
+        protocol              => 'HTTPS',
+        CertificateThumbprint => $_chocolatey_certificate,
+        CertificateStoreName  => 'MY',
+        Sslflags              => 1,
       },
     ],
     require             => Package['chocolatey.server'],
