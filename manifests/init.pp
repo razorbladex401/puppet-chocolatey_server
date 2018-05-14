@@ -43,6 +43,11 @@ class chocolatey_server (
   $_chocolatey_certificate          = $certificate_hash
   $_server_package_url              = $server_package_source
 
+  $_is_windows_2008 = $::kernelmajversion ? {
+    '6.1'   => true,
+    default => false,
+  }
+
   $_web_asp_net = $_is_windows_2008 ? {
     true    => 'Web-Asp-Net',
     default => 'Web-Asp-Net45'
