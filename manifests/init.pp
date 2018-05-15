@@ -75,7 +75,7 @@ class chocolatey_server (
     dsc_ensure => 'present',
     dsc_name   => $_web_asp_net,
   }
-  ->if $::kernelmajversion >= '6.1' {
+  ->if $::kernelmajversion > '6.1' {
     dsc_windowsfeature { 'Web-AppInit':
       dsc_ensure => present,
       dsc_name   => 'Web-AppInit',
