@@ -99,8 +99,6 @@ class chocolatey_server (
     dsc_name                  => 'chocolateyserver',
     dsc_managedruntimeversion => 'v4.0',
     dsc_enable32bitapponwin64 => true,
-    dsc_idletimeout           => '0',
-    dsc_restarttimelimit      => '0',
     dsc_startmode             => 'AlwaysRunning',
     dsc_identitytype          => 'ApplicationPoolIdentity',
     dsc_state                 => 'Started',
