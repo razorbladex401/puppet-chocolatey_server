@@ -61,31 +61,31 @@ class chocolatey_server (
   }
 
   # add windows features
-  dsc_windowsfeature {'IIS':
+  dsc_windowsfeature { 'IIS':
     dsc_ensure => 'present',
     dsc_name   => 'Web-Server',
   }
   # add windows management tools
-  -> dsc_windowsfeature {'Mgmt-Console':
+  -> dsc_windowsfeature { 'Mgmt-Console':
     dsc_ensure => 'present',
     dsc_name   => 'Web-Mgmt-Console',
   }
   # install aspnet package
-  -> dsc_windowsfeature {'$_web_asp_net':
+  -> dsc_windowsfeature { $_web_asp_net:
     dsc_ensure => 'present',
-    dsc_name   => '$_web_asp_net',
+    dsc_name   => $_web_asp_net,
   }
-  -> dsc_windowsfeature {'Web-AppInit':
+  -> dsc_windowsfeature { 'Web-AppInit':
     dsc_ensure => present,
     dsc_name   => 'Web-AppInit',
   }
   # install iis scripting tools
-  -> dsc_windowsfeature {'IIS-Scripting-Tools':
+  -> dsc_windowsfeature { 'IIS-Scripting-Tools':
     dsc_ensure => present,
     dsc_name   => 'Web-Scripting-Tools',
   }
   # stop the default website
-  -> dsc_xwebsite {'Default Web Site':
+  -> dsc_xwebsite { 'Default Web Site':
     dsc_ensure          => 'absent',
     dsc_name            => 'Default Web Site',
     dsc_applicationpool => 'DefaultAppPool',
@@ -104,7 +104,7 @@ class chocolatey_server (
   }
 
   # create both http and https bindings.  certificate hash required for https binding.
-  -> dsc_xwebsite {'chocolateyserver':
+  -> dsc_xwebsite { 'chocolateyserver':
     dsc_ensure          => 'present',
     dsc_name            => 'chocolateyserver',
     dsc_physicalpath    => $_chocolatey_server_location,
