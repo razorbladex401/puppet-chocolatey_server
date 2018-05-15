@@ -94,15 +94,16 @@ class chocolatey_server (
   }
 
   # create application in iis
-  dsc_xwebapppool { $_chocolatey_server_app_pool_name:
+  dsc_xwebapppool { chocolateyserver:
     dsc_ensure                => 'present',
-    dsc_state                 => 'Started',
-    dsc_name                  => $_chocolatey_server_app_pool_name,
+    dsc_name                  => 'chocolateyserver',
     dsc_managedruntimeversion => 'v4.0',
     dsc_enable32bitapponwin64 => true,
     dsc_idletimeout           => '0',
     dsc_restarttimelimit      => '0',
     dsc_startmode             => 'AlwaysRunning',
+    dsc_identitytype          => 'ApplicationPoolIdentity',
+    dsc_state                 => 'Started',
   }
 
   # create both http and https bindings.  certificate hash required for https binding.
