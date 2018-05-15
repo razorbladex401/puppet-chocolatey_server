@@ -75,9 +75,11 @@ class chocolatey_server (
     dsc_ensure => 'present',
     dsc_name   => $_web_asp_net,
   }
-  -> dsc_windowsfeature { 'Web-AppInit':
-    dsc_ensure => present,
-    dsc_name   => 'Web-AppInit',
+  if $::kernelmajversion >= '6.1' {
+    -> dsc_windowsfeature { 'Web-AppInit':
+      dsc_ensure => present,
+      dsc_name   => 'Web-AppInit',
+    }
   }
   # install iis scripting tools
   -> dsc_windowsfeature { 'IIS-Scripting-Tools':
