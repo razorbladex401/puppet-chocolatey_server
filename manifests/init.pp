@@ -115,12 +115,12 @@ class chocolatey_server (
       {
         ipaddress => '*',
         port      => '80',
-        protocol  => 'HTTP',
+        protocol  => 'http',
       },
       {
         ipaddress             => '*',
         port                  => '443',
-        protocol              => 'HTTPS',
+        protocol              => 'https',
         certificatethumbprint => $_chocolatey_certificate,
         certificatestorename  => 'MY',
       },
