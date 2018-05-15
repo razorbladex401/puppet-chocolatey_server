@@ -116,7 +116,6 @@ class chocolatey_server (
         ipaddress => '*',
         port      => '80',
         protocol  => 'http',
-        hostname  => $_chocolatey_hostname,
       },
       {
         ipaddress             => '*',
