@@ -124,7 +124,7 @@ class chocolatey_server (
         protocol              => 'https',
         certificatethumbprint => $_chocolatey_certificate,
         certificatestorename  => 'MY',
-        sslflags              => '1',
+        sslflags              => 0,
       },
     ],
     require             => Package['chocolatey.server'],
