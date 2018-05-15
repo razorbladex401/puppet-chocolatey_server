@@ -79,21 +79,18 @@ class chocolatey_server (
     dsc_windowsfeature { 'Web-AppInit':
       dsc_ensure => present,
       dsc_name   => 'Web-AppInit',
-      require    => dsc_windowsfeature['IIS'],
     }
   }
   # install iis scripting tools
   dsc_windowsfeature { 'IIS-Scripting-Tools':
     dsc_ensure => present,
     dsc_name   => 'Web-Scripting-Tools',
-    require    => dsc_windowsfeature['IIS'],
   }
   # stop the default website
   dsc_xwebsite { 'Default Web Site':
     dsc_ensure          => 'absent',
     dsc_name            => 'Default Web Site',
     dsc_applicationpool => 'DefaultAppPool',
-    require             => dsc_windowsfeature['IIS'],
   }
 
   # create application in iis
@@ -106,7 +103,6 @@ class chocolatey_server (
     dsc_idletimeout           => '0',
     dsc_restarttimelimit      => '0',
     dsc_startmode             => 'AlwaysRunning',
-    require                   => dsc_windowsfeature[$_web_asp_net],
   }
 
   # create both http and https bindings.  certificate hash required for https binding.
